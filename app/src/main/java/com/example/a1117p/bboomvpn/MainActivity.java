@@ -1,0 +1,78 @@
+package com.example.a1117p.bboomvpn;
+
+import android.content.Intent;
+import android.net.VpnService;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+
+public class MainActivity extends AppCompatActivity {
+    Intent service;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        findViewById(R.id.start).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = VpnService.prepare(MainActivity.this);
+                if (intent != null) {
+                    startActivityForResult(intent, 0);
+                } else {
+                    onActivityResult(0, RESULT_OK, null);
+                }
+            }
+        });
+        findViewById(R.id.stop).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (VPNService.isRunning) {
+                    service.putExtra("start", false);
+                    startService(service);
+                }
+            }
+        });
+        findViewById(R.id.add_list).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, UserParseActivity.class);
+                startActivity(intent);
+            }
+        });
+        findViewById(R.id.block_list).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, Block_List_Activity.class);
+                startActivity(intent);
+            }
+        });
+        MySharedPreferences.init(this);
+        Switch aSwitch = findViewById(R.id.mov_switch);
+        aSwitch.setTextOff("동영상 차단 꺼짐");
+        aSwitch.setTextOn("동영상 차단 켜짐");
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                MySharedPreferences.setBlock_Mov(b);
+            }
+        });
+        aSwitch.setChecked(MySharedPreferences.getBlock_Mov());
+    }
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        if (result == RESULT_OK && !VPNService.isRunning) {
+            service = getServiceIntent();
+            service.putExtra("start", true);
+            startService(service);
+        }
+    }
+
+    private Intent getServiceIntent() {
+        return new Intent(this, VPNService.class);
+    }
+
+}

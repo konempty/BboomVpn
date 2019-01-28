@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+
+        <EditText
+            android:id="@+id/find_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="검색할 URL을 입력해 주세요."
+            android:inputType="textUri"
+            android:imeOptions="actionSearch"/>
+
+        <Button
+            android:id="@+id/find_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="검색" />
+
+
+</LinearLayout>

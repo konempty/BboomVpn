@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BboomVPN</string>
+    <string name="connecting">ToyVPN is connecting...</string>
+    <string name="connected">ToyVPN is connected!</string>
+    <string name="disconnected">ToyVPN is disconnected!</string>
+
+</resources>
