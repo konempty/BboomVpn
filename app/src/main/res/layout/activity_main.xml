@@ -36,9 +36,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="차단유저리스트" />
-    <Switch
-        android:id="@+id/mov_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="동영상 차단" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ToggleButton
+            android:id="@+id/mov_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="동영상 차단"
+            android:textOff="동영상 차단 꺼짐"
+            android:textOn="동영상 차단 켜짐" />
+
+        <ToggleButton
+            android:id="@+id/comment_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="댓글 필터 작동"
+            android:textOff="댓글 필터 작동안함"
+            android:textOn="댓글 필터 작동함" />
+    </LinearLayout>
 </LinearLayout>

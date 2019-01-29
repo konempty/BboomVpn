@@ -167,8 +167,9 @@ class SocketDataReaderWorker implements Runnable {
      *
      * @param session Session
      */
-    boolean isNotEnded=false;
-    String before;
+    boolean isNotEnded = false;
+    byte[] before;
+    long beforeunAck;
 
     private void pushDataToClient(@NonNull final Session session) {
         if (!session.hasReceivedData()) {
@@ -194,8 +195,14 @@ class SocketDataReaderWorker implements Runnable {
             session.setSendNext(nextUnAck);
             //we need this data later on for retransmission
             //session.setUnackData(packetBody);
-            if (isNotEnded)
-                packetBody = (before + new String(packetBody)).getBytes();
+            if (isNotEnded) {
+                unAck = beforeunAck;
+                byte[] tmp = new byte[packetBody.length + before.length];
+                System.arraycopy(before, 0, tmp, 0, before.length);
+                System.arraycopy(packetBody, 0, tmp, before.length, packetBody.length);
+                packetBody = tmp;
+            }
+
             isNotEnded = false;
             String string = new String(packetBody);
             if (string.contains("gzip")) {
@@ -206,17 +213,18 @@ class SocketDataReaderWorker implements Runnable {
                 } catch (NumberFormatException | NullPointerException e) {
                     e.printStackTrace();
                 } catch (NotEndException e) {
-                 //   isNotEnded = true;
-                    before = string;
+                    //   isNotEnded = true;
+                    before = packetBody;
                 }
-            } else if (string.contains("data-comment-no")) {
+            } else if (string.contains("data-comment-no")&&MySharedPreferences.getCommentFilter()) {
                 try {
                     packetBody = reply(packetBody);
                 } catch (JSONException | IOException | NumberFormatException e) {
                     e.printStackTrace();
                 } catch (NotEndException e) {
-                   isNotEnded = true;
-                    before = string;
+                    isNotEnded = true;
+                    before = packetBody;
+                    beforeunAck = unAck;
                 }
             }
 
@@ -240,7 +248,7 @@ class SocketDataReaderWorker implements Runnable {
     }
 
     private byte[] reply(byte[] packetBody) throws IOException, NotEndException, JSONException, NumberFormatException {
-        String pa = new String(packetBody);
+     //   String pa = new String(packetBody);
         HttpResponse httpResponse = HttpResponse.parse(packetBody);
         String str = httpResponse.getResponseBodyAsString();
         JSONObject jsonObject = new JSONObject(str);
@@ -254,15 +262,15 @@ class SocketDataReaderWorker implements Runnable {
             int Userno = Integer.parseInt(str.replace("/profile/home.nhn?userNo=", ""));
 
             if (hashMap.containsKey(Userno)) {
-                Elements elements1 = element.getAllElements();
-                elements1.first().remove();
+                element.select("a").next().next().remove();
+                element.select("[class^=bb_up]").remove();
             }
         }
         JSONObject jsonEdited = new JSONObject();
         str = document.body().html().replace("\n", "");
         jsonEdited.put("code", code).put("message", String.valueOf(count)).put("result", str);
         packetBody = HttpResponse.reverse(packetBody, jsonEdited.toString().getBytes(), false);
-        pa = new String(packetBody);
+       // pa = new String(packetBody);
         return packetBody;
     }
 
@@ -278,7 +286,7 @@ class SocketDataReaderWorker implements Runnable {
                 Elements elements1 = element.select(".sc_usr a");
                 String[] strs = elements1.first().attr("href").split("userNo=");
                 int userno = Integer.valueOf(strs[1]);
-                if (hashMap.containsKey(userno)||(mov_block&&element.select(".play_mov").size()!=0))
+                if (hashMap.containsKey(userno) || (mov_block && element.select(".play_mov").size() != 0))
                     element.remove();
             }
             str = document.body().html().replace("\n", "");

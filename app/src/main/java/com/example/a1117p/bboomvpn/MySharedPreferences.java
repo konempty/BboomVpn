@@ -13,12 +13,14 @@ public class MySharedPreferences {
     private static SharedPreferences preference;
     private static SharedPreferences.Editor editor;
     private static Gson gson;
+
     static void init(Context context) {
         preference = context.getSharedPreferences("Bboom", Context.MODE_PRIVATE);
         editor = preference.edit();
         gson = new Gson();
     }
-    static public HashMap<Integer, String> getHashmap(){
+
+    static public HashMap<Integer, String> getHashmap() {
         String hash_str = preference.getString("Block list", "");
         HashMap<Integer, String> hashMap;
         if (hash_str.length() > 0) {
@@ -30,16 +32,28 @@ public class MySharedPreferences {
         }
         return hashMap;
     }
-    static void commit_Block_usr(HashMap<Integer, String> hashMap){
+
+    static void commit_Block_usr(HashMap<Integer, String> hashMap) {
         String hashMapString = gson.toJson(hashMap);
         editor.putString("Block list", hashMapString);
         editor.commit();
     }
-    static void setBlock_Mov(boolean b){
-        editor.putBoolean("Block_mov",b);
+
+    static void setBlock_Mov(boolean b) {
+        editor.putBoolean("Block_mov", b);
         editor.commit();
     }
-    public static boolean getBlock_Mov(){
-        return preference.getBoolean("Block_mov",false);
+
+    public static boolean getBlock_Mov() {
+        return preference.getBoolean("Block_mov", false);
+    }
+
+    static void setCommentFilter(boolean b) {
+        editor.putBoolean("Comment_Filter", b);
+        editor.commit();
+    }
+
+    public static boolean getCommentFilter() {
+        return preference.getBoolean("Comment_Filter", false);
     }
 }

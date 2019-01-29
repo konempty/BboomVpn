@@ -83,9 +83,7 @@ public class HttpResponse {
         outputStream.write(tmp);
         outputStream.write("\r\n0\r\n\r\n".getBytes());
 
-
 // this is sort of ugly, but meh
-
 
         return outputStream.toByteArray();
     }

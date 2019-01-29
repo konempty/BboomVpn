@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.Switch;
+import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
     Intent service;
@@ -50,16 +50,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         MySharedPreferences.init(this);
-        Switch aSwitch = findViewById(R.id.mov_switch);
-        aSwitch.setTextOff("동영상 차단 꺼짐");
-        aSwitch.setTextOn("동영상 차단 켜짐");
-        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        ToggleButton mSwitch = findViewById(R.id.mov_switch);
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 MySharedPreferences.setBlock_Mov(b);
             }
         });
-        aSwitch.setChecked(MySharedPreferences.getBlock_Mov());
+        mSwitch.setChecked(MySharedPreferences.getBlock_Mov());
+
+        ToggleButton cSwitch = findViewById(R.id.comment_switch);
+        cSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                MySharedPreferences.setCommentFilter(b);
+            }
+        });
+        cSwitch.setChecked(MySharedPreferences.getCommentFilter());
     }
 
     @Override
