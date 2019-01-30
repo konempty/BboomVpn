@@ -1,6 +1,7 @@
 package com.example.a1117p.bboomvpn;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,14 @@ public class MainActivity extends AppCompatActivity {
                     service.putExtra("start", false);
                     startService(service);
                 }
+            }
+        });
+        findViewById(R.id.tobboom).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri uri = Uri.parse("http://m.bboom.naver.com/");
+                Intent it  = new Intent(Intent.ACTION_VIEW,uri);
+                startActivity(it);
             }
         });
         findViewById(R.id.add_list).setOnClickListener(new View.OnClickListener() {

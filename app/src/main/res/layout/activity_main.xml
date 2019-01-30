@@ -24,7 +24,11 @@
             android:layout_gravity=""
             android:text="종료" />
     </LinearLayout>
-
+    <Button
+        android:id="@+id/tobboom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="뿜으로 바로가기" />
     <Button
         android:id="@+id/add_list"
         android:layout_width="match_parent"

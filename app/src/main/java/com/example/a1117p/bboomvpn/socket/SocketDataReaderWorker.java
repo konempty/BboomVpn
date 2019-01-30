@@ -169,7 +169,6 @@ class SocketDataReaderWorker implements Runnable {
      */
     boolean isNotEnded = false;
     byte[] before;
-    long beforeunAck;
 
     private void pushDataToClient(@NonNull final Session session) {
         if (!session.hasReceivedData()) {
@@ -178,6 +177,7 @@ class SocketDataReaderWorker implements Runnable {
         }
 
         IPv4Header ipHeader = session.getLastIpHeader();
+        int ip = ipHeader.getDestinationIP();
         TCPHeader tcpheader = session.getLastTcpHeader();
         // TODO What does 60 mean?
         int max = session.getMaxSegmentSize() - 60;
@@ -190,22 +190,21 @@ class SocketDataReaderWorker implements Runnable {
         byte[] packetBody = session.getReceivedData(max);
         if (packetBody != null && packetBody.length > 0) {
             long unAck = session.getSendNext();
-            long nextUnAck = session.getSendNext() + packetBody.length;
-            //// Log.d(TAG,"sending vpn client body len: "+packetBody.length+", current seq: "+unAck+", next seq: "+nextUnAck);
-            session.setSendNext(nextUnAck);
+            boolean isNormalPacket=true;
+
             //we need this data later on for retransmission
             //session.setUnackData(packetBody);
-            if (isNotEnded) {
-                unAck = beforeunAck;
-                byte[] tmp = new byte[packetBody.length + before.length];
-                System.arraycopy(before, 0, tmp, 0, before.length);
-                System.arraycopy(packetBody, 0, tmp, before.length, packetBody.length);
-                packetBody = tmp;
-            }
-
-            isNotEnded = false;
             String string = new String(packetBody);
             if (string.contains("gzip")) {
+                if (isNotEnded) {
+                    byte[] tmp = new byte[packetBody.length + before.length];
+                    System.arraycopy(before, 0, tmp, 0, before.length);
+                    System.arraycopy(packetBody, 0, tmp, before.length, packetBody.length);
+                    packetBody = tmp;
+                }
+
+                isNormalPacket = isNotEnded = false;
+
                 try {
                     packetBody = Post(packetBody);
                 } catch (IOException e) {
@@ -217,6 +216,15 @@ class SocketDataReaderWorker implements Runnable {
                     before = packetBody;
                 }
             } else if (string.contains("data-comment-no")&&MySharedPreferences.getCommentFilter()) {
+                if (isNotEnded) {
+                    byte[] tmp = new byte[packetBody.length + before.length];
+                    System.arraycopy(before, 0, tmp, 0, before.length);
+                    System.arraycopy(packetBody, 0, tmp, before.length, packetBody.length);
+                    packetBody = tmp;
+                }
+
+                isNormalPacket = isNotEnded = false;
+
                 try {
                     packetBody = reply(packetBody);
                 } catch (JSONException | IOException | NumberFormatException e) {
@@ -224,13 +232,14 @@ class SocketDataReaderWorker implements Runnable {
                 } catch (NotEndException e) {
                     isNotEnded = true;
                     before = packetBody;
-                    beforeunAck = unAck;
                 }
             }
+            if (isNormalPacket||!isNotEnded) {
+                long nextUnAck = session.getSendNext() + packetBody.length;
+                //// Log.d(TAG,"sending vpn client body len: "+packetBody.length+", current seq: "+unAck+", next seq: "+nextUnAck);
+                session.setSendNext(nextUnAck);
 
-
-            session.setResendPacketCounter(0);
-            if (!isNotEnded) {
+                session.setResendPacketCounter(0);
                 byte[] data = TCPPacketFactory.createResponsePacketData(ipHeader,
                         tcpheader, packetBody, session.hasReceivedLastSegment(),
                         session.getRecSequence(), unAck,
@@ -264,6 +273,7 @@ class SocketDataReaderWorker implements Runnable {
             if (hashMap.containsKey(Userno)) {
                 element.select("a").next().next().remove();
                 element.select("[class^=bb_up]").remove();
+                element.select(".sc_thumb").remove();
             }
         }
         JSONObject jsonEdited = new JSONObject();
